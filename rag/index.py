@@ -16,11 +16,10 @@ from twilio.twiml.messaging_response import MessagingResponse
 # Keep the application running to listen for updates
 # Check TensorFlow version
 print(tf.__version__)  # This should print 2.15.0
-
-#
-# # 2. Create the app object
 app = FastAPI()
 
+
+#CUSTOM AI MODELS
 CLASS_NAMES = ['Tomato_Bacterial_spot',
                'Tomato_Early_blight',
                'Tomato_Late_blight',
@@ -31,6 +30,7 @@ CLASS_NAMES = ['Tomato_Bacterial_spot',
                'Tomato__Tomato_YellowLeaf__Curl_Virus',
                'Tomato__Tomato_mosaic_virus',
                'Tomato_healthy']
+
 corn_CLASS_NAMES = ['Corn Blight', 'Corn Common_Rust', 'Corn Gray_Leaf_Spot', 'Healthy Corn']
 potato_CLASS_NAMES = ['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
 
@@ -38,13 +38,13 @@ MODEL = tf.keras.models.load_model("models/tomato_model_v2.keras")
 potato_MODEL = tf.keras.models.load_model("models/potato.keras")
 corn_MODEL = tf.keras.models.load_model("models/corn_model_v1.keras")
 
+
+
+
 @app.get('/')
 def index():
-    return {'message': 'RUSERO AI'}
+    return {'message': 'bot is up'}
 
-@app.get('/{name}')
-def get_name(name: str):
-    return {'Welcome To RuseroAi': f'{name}'}
 
 def read_file_as_image(data) -> np.ndarray:
     # Use Pillow to convert the binary data to a NumPy array representing an image
@@ -55,6 +55,26 @@ def read_file_as_image(data) -> np.ndarray:
     image = image.resize(expected_size)
 
     return np.array(image)
+
+def predict_disease(model, class_names, img_batch, user_phone_number):
+    """
+    Generic function to predict disease from image batch using specified model and class names.
+    
+    Args:
+        model: The ML model to use for prediction
+        class_names: List of class names for the model
+        img_batch: Batch of images to predict on
+        user_phone_number: Phone number to send results to
+    
+    Returns:
+        str: Formatted prediction result
+    """
+    predictions = model.predict(img_batch)
+    predicted_class = class_names[np.argmax(predictions[0])]
+    confidence = float(np.max(predictions[0]))
+    result = f"there is a chance of {predicted_class} with confidence, {confidence} from the image shared by the doctor"
+    chat_with_phil(result, to=f"whatsapp:+{user_phone_number}")
+    return result
 
 
 @app.post('/rusero')
@@ -86,23 +106,11 @@ async def whatsapp_webhook(request: Request):
         return chat_with_phil(describe_media(data), to=f"whatsapp:+{user_phone_number}", describe=True)
 
     elif isifo == "potato":
-        predictions = potato_MODEL.predict(img_batch)
-        predicted_class = potato_CLASS_NAMES[np.argmax(predictions[0])]
-        confidence = float(np.max(predictions[0]))
-        result = f"class, {predicted_class}, Confidence, {confidence}"
-        chat_with_phil(result, to=f"whatsapp:+{user_phone_number}")
+        predict_disease(potato_MODEL, potato_CLASS_NAMES, img_batch, user_phone_number)
     elif isifo == "corn":
-        predictions = corn_MODEL.predict(img_batch)
-        predicted_class = corn_CLASS_NAMES[np.argmax(predictions[0])]
-        confidence = float(np.max(predictions[0]))
-        result = f"class, {predicted_class}, Confidence, {confidence}"
-        chat_with_phil(result, to=f"whatsapp:+{user_phone_number}")
+        predict_disease(corn_MODEL, corn_CLASS_NAMES, img_batch, user_phone_number)
     elif isifo == "tomato":
-        predictions = MODEL.predict(img_batch)
-        predicted_class = CLASS_NAMES[np.argmax(predictions[0])]
-        confidence = float(np.max(predictions[0]))
-        result = f"class, {predicted_class}, Confidence, {confidence}"
-        chat_with_phil(result, to=f"whatsapp:+{user_phone_number}")
+        predict_disease(MODEL, CLASS_NAMES, img_batch, user_phone_number)
     else:
         chat_with_phil(isifo, to=f"whatsapp:+{user_phone_number}")
 
