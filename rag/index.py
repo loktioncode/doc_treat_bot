@@ -72,12 +72,12 @@ def predict_disease(model, class_names, img_batch, user_phone_number):
     predictions = model.predict(img_batch)
     predicted_class = class_names[np.argmax(predictions[0])]
     confidence = float(np.max(predictions[0]))
-    result = f"there is a chance of {predicted_class} with confidence, {confidence} from the image shared by the doctor"
+    result = f"there is a chance of {predicted_class} with confidence, {confidence} from the patient images shared by the doctor"
     chat_with_phil(result, to=f"whatsapp:+{user_phone_number}")
     return result
 
 
-@app.post('/rusero')
+@app.post('/gqirha')
 async def whatsapp_webhook(request: Request):
 
     form_data = await request.form()
