@@ -165,7 +165,7 @@ tools = [retriever_tool, search, fetch_weather]
 
 
 @traceable
-def user_input(user_question, to):
+def user_input(user_question):
 
 
     agent = create_react_agent(llm_model, tools, prompt)
@@ -176,16 +176,14 @@ def user_input(user_question, to):
 
     agent_with_chat_history = RunnableWithMessageHistory(
         agent_executor,
-        # This is needed because in most real world scenarios, a session id is needed
-        # It isn't really used here because we are using a simple in memory ChatMessageHistory
-        lambda session_id: message_history,
         input_messages_key="input",
         history_messages_key="chat_history",
     )
 
     response = agent_with_chat_history.invoke(
         {
-            "input": ""}
+            "input": f"{user_question}"
+            }
 
         ,
         # This is needed because in most real world scenarios, a session id is needed
