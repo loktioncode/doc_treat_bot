@@ -20,7 +20,7 @@ def chat_with_phil(info, to, describe=False):
     if describe:
         client.messages.create(to=to, from_=f"whatsapp:{twilio_number}", body=info)
     else:
-        msg = user_input(info, to=to)
+        msg = user_input(info)
         client.messages.create(to=to, from_=f"whatsapp:{twilio_number}", body=msg)
 
 

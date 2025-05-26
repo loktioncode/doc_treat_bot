@@ -39,11 +39,8 @@ embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 new_db = FAISS.load_local("./rag/faiss_index", embeddings,
                           allow_dangerous_deserialization=True)
 
-# Get the prompt to use
 
-# "models/gemini-1.5-flash"
-# "gemini-1.5-pro-latest"
-llm_model = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", temperature=0, safety_settings={
+llm_model = ChatGoogleGenerativeAI(model="models/gemini-2.0-flash", temperature=0, safety_settings={
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 })
 
@@ -176,6 +173,7 @@ def user_input(user_question):
 
     agent_with_chat_history = RunnableWithMessageHistory(
         agent_executor,
+        lambda session_id: message_history,
         input_messages_key="input",
         history_messages_key="chat_history",
     )

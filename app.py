@@ -54,7 +54,7 @@ def read_file_as_image(data) -> np.ndarray:
     return np.array(image)
 
 
-@app.post('/qgirha')
+@app.post('/gqirha')
 async def whatsapp_webhook(request: Request):
 
     form_data = await request.form()
@@ -77,7 +77,6 @@ async def whatsapp_webhook(request: Request):
 
     input_image = read_file_as_image(data)
     img_batch = np.expand_dims(input_image, axis=0).astype(np.float32)
-
     if isifo == '':
         return chat_with_phil(describe_media(data), to=f"whatsapp:+{user_phone_number}", describe=True)
 
@@ -104,6 +103,6 @@ async def whatsapp_webhook(request: Request):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8001)
+    uvicorn.run(app, host='127.0.0.1', port=8000)
 
-#uvicorn app:app --reloadurn {"item_id": item_id, "q": q}
+# uvicorn app:app --host 127.0.0.1 --port 8000 --reload
