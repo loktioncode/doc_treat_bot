@@ -105,6 +105,7 @@ async def whatsapp_webhook(request: Request):
     if isifo == '':
         return chat_with_phil(describe_media(data), to=f"whatsapp:+{user_phone_number}", describe=True)
 
+#WE CAN ADD CUSTOM ML MODELS HERE
     elif isifo == "potato":
         predict_disease(potato_MODEL, potato_CLASS_NAMES, img_batch, user_phone_number)
     elif isifo == "corn":
